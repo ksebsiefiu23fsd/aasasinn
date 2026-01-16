@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Купить 1 звезду Telegram</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .description {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
+            font-size: 16px;
+        }
+        
+        .star-icon {
+            font-size: 64px;
+            margin: 20px 0;
+            color: #FFD700;
+            text-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+        }
+        
+        .price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .price .currency {
+            color: #667eea;
+        }
+        
+        .buy-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .buy-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .buy-button:active {
+            transform: translateY(0);
+        }
+        
+        .buy-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .loading {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .status-message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 12px;
+            display: none;
+            font-size: 14px;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .user-info {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 14px;
+            color: #666;
+            text-align: left;
+        }
+        
+        .user-info div {
+            margin-bottom: 5px;
+            word-break: break-all;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            color: rgba(255,255,255,0.8);
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .footer a {
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Купить цифровой товар</h1>
+        <p class="description">
+            Получите доступ к эксклюзивному цифровому контенту за 1 Telegram Star
+        </p>
+        
+        <div class="star-icon">★</div>
+        
+        <div class="price">
+            1 <span class="currency">Telegram Star (XTR)</span>
+        </div>
+        
+        <button id="buyButton" class="buy-button" onclick="createPayment()">
+            <span id="buttonText">Купить за 1 звезду</span>
+            <div id="buttonLoading" class="loading"></div>
+        </button>
+        
+        <div id="statusMessage" class="status-message"></div>
+        
+        <div class="user-info">
+            <div><strong>ID пользователя:</strong> <span id="userId">-</span></div>
+            <div><strong>Имя:</strong> <span id="userName">-</span></div>
+            <div><strong>Язык:</strong> <span id="userLanguage">-</span></div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        Цифровой товар • Оплата через Telegram Stars • 
+        <a href="#" onclick="showTerms()">Условия использования</a>
+    </div>
+
+    <script>
+        // Инициализация Telegram Web App
+        const tg = window.Telegram.WebApp;
+        
+        // Показываем главную кнопку интерфейса
+        tg.expand();
+        tg.MainButton.setText('Готово к оплате');
+        tg.MainButton.hide();
+        
+        // Отображаем информацию о пользователе
+        document.getElementById('userId').textContent = tg.initDataUnsafe.user?.id || 'Не доступно';
+        document.getElementById('userName').textContent = tg.initDataUnsafe.user?.first_name || 'Не доступно';
+        document.getElementById('userLanguage').textContent = tg.initDataUnsafe.user?.language_code || 'Не доступно';
+        
+        // Замените эту ссылку на ваш сервер Render после деплоя
+        const BACKEND_URL = 'https://ваш-сервер.onrender.com';
+        
+        async function createPayment() {
+            const button = document.getElementById('buyButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonLoading = document.getElementById('buttonLoading');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            // Показываем индикатор загрузки
+            button.disabled = true;
+            buttonText.style.display = 'none';
+            buttonLoading.style.display = 'block';
+            statusMessage.style.display = 'none';
+            
+            try {
+                // Получаем ID пользователя из Telegram Web App
+                const userId = tg.initDataUnsafe.user?.id;
+                
+                if (!userId) {
+                    throw new Error('Не удалось получить ID пользователя');
+                }
+                
+                // Отправляем запрос на создание платежа
+                const response = await fetch(`${BACKEND_URL}/create-payment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userId: userId })
+                });
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Ошибка при создании платежа');
+                }
+                
+                // Открываем интерфейс оплаты Telegram[citation:9]
+                tg.openInvoice(data.invoiceLink, (status) => {
+                    if (status === 'paid') {
+                        showStatus('✅ Платеж успешно завершен! Товар активирован.', 'success');
+                        tg.showAlert('Спасибо за покупку! Ваш цифровой товар активирован.');
+                    } else if (status === 'failed') {
+                        showStatus('❌ Платеж не удался. Попробуйте еще раз.', 'error');
+                    } else if (status === 'pending') {
+                        showStatus('⏳ Платеж в обработке...', 'success');
+                    } else if (status === 'cancelled') {
+                        showStatus('❌ Платеж отменен.', 'error');
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showStatus(`❌ Ошибка: ${error.message}`, 'error');
+            } finally {
+                // Возвращаем кнопку в исходное состояние
+                button.disabled = false;
+                buttonText.style.display = 'block';
+                buttonLoading.style.display = 'none';
+            }
+        }
+        
+        function showStatus(message, type) {
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${type}`;
+            statusMessage.style.display = 'block';
+        }
+        
+        function showTerms() {
+            tg.showAlert(
+                'Условия использования:\n\n' +
+                '1. Это демонстрационный цифровой товар\n' +
+                '2. Оплата производится через Telegram Stars\n' +
+                '3. Возврат средств не предусмотрен\n' +
+                '4. Товар предоставляется мгновенно после оплаты',
+                'Закрыть'
+            );
+        }
+        
+        // Показываем информацию о версии Web App
+        console.log('Telegram Web App версия:', tg.version);
+        console.log('Платформа:', tg.platform);
+        console('Данные инициализации:', tg.initDataUnsafe);
+    </script>
+</body>
+</html>
